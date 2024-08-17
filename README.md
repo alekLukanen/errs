@@ -32,7 +32,7 @@ func main() {
 
 Running the above example:
 
-```shell
+```
 $ go run -trimpath cmd/example/main.go
 Error Messages
 - [0] error in FuncB
