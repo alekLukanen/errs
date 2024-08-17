@@ -27,9 +27,11 @@ func main() {
 	err := FuncA()
 	ErrStack := errs.ErrorWithStack(err)
 	fmt.Printf(ErrStack)
-}```
+}
+```
 
 Running the above example:
+
 ```shell
 $ go run -trimpath cmd/example/main.go
 Error Messages
@@ -42,5 +44,6 @@ main.FuncA()
 	./main.go:10 +0x13
 main.main()
 	./main.go:20 +0x13```
+```
 
 Because this package uses the `runtime` stack function you should always run your program with the `-trimpath` build option set so that the file paths are removed from the stack trace.
