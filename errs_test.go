@@ -31,9 +31,56 @@ func FuncD() error {
 }
 
 func TestWrappingMultipleErrors(t *testing.T) {
+	sb := strings.Builder{}
+	sb.WriteString("Error Messages\n")
+	sb.WriteString("- [0] error from FuncB\n")
+	sb.WriteString("- [1] received error from FuncB()\n")
+	sb.WriteString("- [2] while handling error from FuncB() received an error from FuncC()\n")
+	sb.WriteString("- [3] error from FuncC\n")
+	sb.WriteString("Primary Stack Trace\n")
+	expectedPrefix := sb.String()
+
 	err := FuncD()
 	errStr := ErrorWithStack(err)
 	fmt.Printf(errStr)
+
+	if !strings.HasPrefix(errStr, expectedPrefix) {
+		t.Errorf("ErrorWithStack() failed: %s", errStr)
+		return
+	}
+
+}
+
+func TestErrorStack(t *testing.T) {
+
+	err := FuncD()
+	errStack := ErrorStack(err)
+
+	fmt.Printf(errStack)
+
+	if !strings.Contains(errStack, "errs/errs_test.go") {
+		t.Errorf("ErrorStack() failed: %s", errStack)
+	}
+}
+
+func TestErrorMessage(t *testing.T) {
+	sb := strings.Builder{}
+	sb.WriteString("Error Messages\n")
+	sb.WriteString("- [0] error from FuncB\n")
+	sb.WriteString("- [1] received error from FuncB()\n")
+	sb.WriteString("- [2] while handling error from FuncB() received an error from FuncC()\n")
+	sb.WriteString("- [3] error from FuncC")
+	expectedStr := sb.String()
+
+	err := FuncD()
+	errStr := ErrorMessage(err)
+	fmt.Printf(errStr)
+
+	if errStr != expectedStr {
+		t.Errorf("ErrorWithStack() failed: %s", errStr)
+		return
+	}
+
 }
 
 func TestNewStackErrWithWrappedError(t *testing.T) {

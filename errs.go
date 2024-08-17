@@ -79,11 +79,8 @@ func cleanedStack(stack []byte) string {
 }
 
 // This function allows you to pass in an arbirary error and get the
-// error message and stack trace if that error wraps another error
-// with a stack trace or is a stack trace error itself. It assumes only
-// one error contains a stack trace and will return the first error
-// that is of the StackError type.
-// If the error does not contain a stack trace, it will return the
+// error message and stack trace if that error is a StackError.
+// If the error is not a StackError, it will return the
 // error message and a "No Stack" message for the stack trace.
 func ErrorWithStack(err error) string {
 	stackErr, ok := err.(*StackError)
@@ -91,6 +88,27 @@ func ErrorWithStack(err error) string {
 		return fmt.Sprintf("%s\n%s\n%s", stackErr.Error(), ERR_STACK_TITLE, stackErr.Stack())
 	} else {
 		return fmt.Sprintf("%s\n%s\n%s\n[No Stack]\n", ERR_MSG_TITLE, err.Error(), ERR_STACK_TITLE)
+	}
+}
+
+// Get the error's string message
+func ErrorMessage(err error) string {
+	stackErr, ok := err.(*StackError)
+	if ok {
+		return stackErr.Error()
+	} else {
+		return fmt.Sprintf("%s\n", err.Error())
+	}
+}
+
+// Get the error's stack trace if it is a StackError
+// else return a "No Stack" message.
+func ErrorStack(err error) string {
+	stackErr, ok := err.(*StackError)
+	if ok {
+		return stackErr.Stack()
+	} else {
+		return "[No Stack]\n"
 	}
 }
 
@@ -102,7 +120,7 @@ func ErrorWithStack(err error) string {
 // Error Messages
 // - [0] error from FuncB
 // - [1] wrapping error in FuncA()
-// Stack Trace
+// Primary Stack Trace
 // ...
 func Wrap(primaryErr error, newErrs ...error) error {
 	if len(newErrs) == 0 {
