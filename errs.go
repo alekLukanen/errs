@@ -46,8 +46,19 @@ func (obj *StackError) Error() string {
 	return sb.String()
 }
 
+func (obj *StackError) Is(target error) bool {
+	if obj.err == target {
+		return true
+	}
+	return false
+}
+
 func (obj *StackError) Unwrap() []error {
-	return obj.wrappedErrs
+	if len(obj.wrappedErrs) != 0 {
+		return obj.wrappedErrs
+	} else {
+		return nil
+	}
 }
 
 // Returns the error message with the stack trace
@@ -64,7 +75,7 @@ func (obj *StackError) Stack() string {
 func NewStackError(err error) *StackError {
 	stack := make([]byte, MAX_STACK_SIZE)
 	size := runtime.Stack(stack, false)
-	return &StackError{err: err, stack: cleanedStack(stack[:size])}
+	return &StackError{err: err, stack: cleanedStack(stack[:size]), wrappedErrs: make([]error, 0)}
 }
 
 // Clean the stack trace of the firth 2 lines which contain the

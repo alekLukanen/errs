@@ -1,21 +1,25 @@
 package errs
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"testing"
 )
+
+var ErrB = fmt.Errorf("error from FuncB")
+var ErrC = fmt.Errorf("error from FuncC")
 
 func FuncA() error {
 	return Wrap(FuncB(), fmt.Errorf("received error in FuncA()"))
 }
 
 func FuncB() error {
-	return NewStackError(fmt.Errorf("error from FuncB"))
+	return NewStackError(ErrB)
 }
 
 func FuncC() error {
-	return NewStackError(fmt.Errorf("error from FuncC"))
+	return NewStackError(ErrC)
 }
 
 func FuncD() error {
@@ -28,6 +32,25 @@ func FuncD() error {
 		errC,
 	)
 	return err
+}
+
+func TestStackErrorCanUseErrorsIs(t *testing.T) {
+
+	err := FuncD()
+	if !errors.Is(err, ErrB) {
+		t.Log(err.(*StackError).wrappedErrs)
+		t.Errorf("failed, expected the error to wrap ErrB: %s", err)
+		return
+	}
+	if !errors.Is(err, ErrC) {
+		t.Errorf("failed, expected the error to wrap ErrC: %s", err)
+		return
+	}
+	if errors.Is(err, fmt.Errorf("some other error")) {
+		t.Errorf("failed: %s", err)
+		return
+	}
+
 }
 
 func TestWrappingMultipleErrors(t *testing.T) {
