@@ -83,6 +83,10 @@ func cleanedStack(stack []byte) string {
 // If the error is not a StackError, it will return the
 // error message and a "No Stack" message for the stack trace.
 func ErrorWithStack(err error) string {
+	if err == nil {
+		return "[Nil Error]"
+	}
+
 	stackErr, ok := err.(*StackError)
 	if ok {
 		return fmt.Sprintf("%s\n%s\n%s", stackErr.Error(), ERR_STACK_TITLE, stackErr.Stack())
