@@ -63,8 +63,8 @@ func (obj *StackError) Stack() string {
 // Create a new error with a stack trace
 func NewStackError(err error) *StackError {
 	stack := make([]byte, MAX_STACK_SIZE)
-	runtime.Stack(stack, false)
-	return &StackError{err: err, stack: cleanedStack(stack)}
+	size := runtime.Stack(stack, false)
+	return &StackError{err: err, stack: cleanedStack(stack[:size])}
 }
 
 // Clean the stack trace of the firth 2 lines which contain the
