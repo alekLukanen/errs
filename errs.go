@@ -1,6 +1,7 @@
 package errs
 
 import (
+	"errors"
 	"fmt"
 	"runtime"
 	"strings"
@@ -47,7 +48,7 @@ func (obj *StackError) Error() string {
 }
 
 func (obj *StackError) Is(target error) bool {
-	if obj.err == target {
+	if errors.Is(obj.err, target) {
 		return true
 	}
 	return false
