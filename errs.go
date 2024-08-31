@@ -13,9 +13,15 @@ var MAX_STACK_SIZE int = 4096
 
 // StackError is a custom error type that includes a stack trace
 type StackError struct {
-	err         error
-	stack       string
+	err      error
+	funcName string
+	lineNum  int
+
+	stack string
+
 	wrappedErrs []error
+	funcNames   []string
+	lineNumbers []int
 }
 
 // Returns the error message without the stack trace
@@ -24,7 +30,7 @@ func (obj *StackError) Error() string {
 	var sb strings.Builder
 	sb.WriteString(ERR_MSG_TITLE)
 	sb.WriteString("\n")
-	sb.WriteString("- [0] ")
+	sb.WriteString(fmt.Sprintf("- [%d | %s:%d] ", 0, obj.funcName, obj.lineNum))
 	sb.WriteString(obj.err.Error())
 
 	if len(obj.wrappedErrs) == 0 {
@@ -35,9 +41,11 @@ func (obj *StackError) Error() string {
 	for i, err := range obj.wrappedErrs {
 		sErr, ok := err.(*StackError)
 		if ok {
-			sb.WriteString(fmt.Sprintf("- [%d] %s", i+1, sErr.err.Error()))
+			sb.WriteString(fmt.Sprintf("- [%d | %s:%d] ", i+1, sErr.funcName, sErr.lineNum))
+			sb.WriteString(sErr.err.Error())
 		} else {
-			sb.WriteString(fmt.Sprintf("- [%d] %s", i+1, err.Error()))
+			sb.WriteString(fmt.Sprintf("- [%d | %s:%d] ", i+1, obj.funcNames[i], obj.lineNumbers[i]))
+			sb.WriteString(err.Error())
 		}
 		if i != len(obj.wrappedErrs)-1 {
 			sb.WriteString("\n")
@@ -48,10 +56,7 @@ func (obj *StackError) Error() string {
 }
 
 func (obj *StackError) Is(target error) bool {
-	if errors.Is(obj.err, target) {
-		return true
-	}
-	return false
+	return errors.Is(obj.err, target)
 }
 
 func (obj *StackError) Unwrap() []error {
@@ -76,7 +81,14 @@ func (obj *StackError) Stack() string {
 func NewStackError(err error) *StackError {
 	stack := make([]byte, MAX_STACK_SIZE)
 	size := runtime.Stack(stack, false)
-	return &StackError{err: err, stack: cleanedStack(stack[:size]), wrappedErrs: make([]error, 0)}
+	pc, _, lineNum, _ := runtime.Caller(1)
+	funcName := runtime.FuncForPC(pc).Name()
+	return &StackError{
+		err:         err,
+		funcName:    funcName,
+		lineNum:     lineNum,
+		stack:       cleanedStack(stack[:size]),
+		wrappedErrs: make([]error, 0)}
 }
 
 // Clean the stack trace of the firth 2 lines which contain the
@@ -147,6 +159,9 @@ func Wrap(primaryErr error, newErrs ...error) error {
 	if ok {
 		for _, newErr := range newErrs {
 			stackErr.wrappedErrs = append(stackErr.wrappedErrs, newErr)
+			pc, _, lineNum, _ := runtime.Caller(1)
+			stackErr.funcNames = append(stackErr.funcNames, runtime.FuncForPC(pc).Name())
+			stackErr.lineNumbers = append(stackErr.lineNumbers, lineNum)
 		}
 		return stackErr
 	} else {

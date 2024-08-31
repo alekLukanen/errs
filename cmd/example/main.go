@@ -19,5 +19,5 @@ func FuncB() error {
 func main() {
 	err := FuncA()
 	ErrStack := errs.ErrorWithStack(err)
-	fmt.Printf(ErrStack)
+	fmt.Print(ErrStack)
 }

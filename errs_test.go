@@ -51,6 +51,9 @@ func TestStackErrorCanUseErrorsIs(t *testing.T) {
 		return
 	}
 
+	t.Log("funcs: ", err.(*StackError).funcNames)
+	t.Log("lines: ", err.(*StackError).lineNumbers)
+
 }
 
 func TestWrappingMultipleErrors(t *testing.T) {
@@ -65,7 +68,7 @@ func TestWrappingMultipleErrors(t *testing.T) {
 
 	err := FuncD()
 	errStr := ErrorWithStack(err)
-	fmt.Printf(errStr)
+	fmt.Print(errStr)
 
 	if !strings.HasPrefix(errStr, expectedPrefix) {
 		t.Errorf("ErrorWithStack() failed: %s", errStr)
@@ -79,7 +82,7 @@ func TestErrorStack(t *testing.T) {
 	err := FuncD()
 	errStack := ErrorStack(err)
 
-	fmt.Printf(errStack)
+	fmt.Print(errStack)
 
 	if !strings.Contains(errStack, "errs/errs_test.go") {
 		t.Errorf("ErrorStack() failed: %s", errStack)
@@ -97,7 +100,7 @@ func TestErrorMessage(t *testing.T) {
 
 	err := FuncD()
 	errStr := ErrorMessage(err)
-	fmt.Printf(errStr)
+	fmt.Print(errStr)
 
 	if errStr != expectedStr {
 		t.Errorf("ErrorWithStack() failed: %s", errStr)
@@ -116,7 +119,7 @@ func TestNewStackErrWithWrappedError(t *testing.T) {
 
 	err := FuncA()
 	formattedErr := ErrorWithStack(err)
-	fmt.Printf(formattedErr)
+	fmt.Print(formattedErr)
 
 	if !strings.HasPrefix(formattedErr, expectedPrefix) {
 		t.Errorf("ErrorWithStack() failed: %s", formattedErr)
@@ -129,7 +132,7 @@ func TestErrorWithStack(t *testing.T) {
 	err := fmt.Errorf("test error")
 	stackErr := NewStackError(err)
 	errStr := ErrorWithStack(stackErr)
-	fmt.Printf(errStr)
+	fmt.Print(errStr)
 
 	if !strings.Contains(errStr, "test error") {
 		t.Errorf("ErrorWithStack() failed: %s", errStr)
@@ -145,7 +148,7 @@ func TestErrorWithStack(t *testing.T) {
 func TestErrorWithStack_noStack(t *testing.T) {
 	err := fmt.Errorf("test error")
 	errStr := ErrorWithStack(err)
-	fmt.Printf(errStr)
+	fmt.Print(errStr)
 	if !strings.Contains(errStr, "test error") {
 		t.Errorf("ErrorWithStack() failed: %s", errStr)
 		return
