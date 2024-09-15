@@ -27,10 +27,15 @@ type StackError struct {
 // Returns the error message without the stack trace
 func (obj *StackError) Error() string {
 
+	cleanFuncName := func(s string) string {
+		sParts := strings.Split(s, "/")
+		return sParts[len(sParts)-1]
+	}
+
 	var sb strings.Builder
 	sb.WriteString(ERR_MSG_TITLE)
 	sb.WriteString("\n")
-	sb.WriteString(fmt.Sprintf("- [%d | %s:%d] ", 0, obj.funcName, obj.lineNum))
+	sb.WriteString(fmt.Sprintf("- [%d | %s:%d] ", 0, cleanFuncName(obj.funcName), obj.lineNum))
 	sb.WriteString(obj.err.Error())
 
 	if len(obj.wrappedErrs) == 0 {
@@ -41,10 +46,10 @@ func (obj *StackError) Error() string {
 	for i, err := range obj.wrappedErrs {
 		sErr, ok := err.(*StackError)
 		if ok {
-			sb.WriteString(fmt.Sprintf("- [%d | %s:%d] ", i+1, sErr.funcName, sErr.lineNum))
+			sb.WriteString(fmt.Sprintf("- [%d | %s:%d] ", i+1, cleanFuncName(sErr.funcName), sErr.lineNum))
 			sb.WriteString(sErr.err.Error())
 		} else {
-			sb.WriteString(fmt.Sprintf("- [%d | %s:%d] ", i+1, obj.funcNames[i], obj.lineNumbers[i]))
+			sb.WriteString(fmt.Sprintf("- [%d | %s:%d] ", i+1, cleanFuncName(obj.funcNames[i]), obj.lineNumbers[i]))
 			sb.WriteString(err.Error())
 		}
 		if i != len(obj.wrappedErrs)-1 {
@@ -152,7 +157,7 @@ func ErrorStack(err error) string {
 // ...
 func Wrap(primaryErr error, newErrs ...error) error {
 	if len(newErrs) == 0 {
-		return primaryErr
+		newErrs = append(newErrs, fmt.Errorf("."))
 	}
 
 	stackErr, ok := primaryErr.(*StackError)
