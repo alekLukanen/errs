@@ -124,16 +124,6 @@ func ErrorWithStack(err error) string {
 	}
 }
 
-// Get the error's string message
-func ErrorMessage(err error) string {
-	stackErr, ok := err.(*StackError)
-	if ok {
-		return stackErr.Error()
-	} else {
-		return fmt.Sprintf("%s\n", err.Error())
-	}
-}
-
 // Get the error's stack trace if it is a StackError
 // else return a "No Stack" message.
 func ErrorStack(err error) string {
