@@ -35,15 +35,15 @@ Running the above example:
 ```
 $ go run -trimpath cmd/example/main.go
 Error Messages
-- [0] error in FuncB
-- [1] received error from FuncB()
+- [0 | main.FuncB:16] error in FuncB
+- [1 | main.FuncA:9] received error from FuncB()
 Primary Stack Trace
 main.FuncB()
 	./main.go:16 +0x2b
 main.FuncA()
 	./main.go:10 +0x13
 main.main()
-	./main.go:20 +0x13```
+	./main.go:20 +0x13
 ```
 
 Because this package uses the `runtime` stack function you should always run your program with the `-trimpath` build option set so that the file paths are removed from the stack trace.
