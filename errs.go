@@ -64,6 +64,10 @@ func (obj *StackError) Is(target error) bool {
 	return errors.Is(obj.err, target)
 }
 
+func (obj *StackError) As(target any) bool {
+	return errors.As(obj.err, target)
+}
+
 func (obj *StackError) Unwrap() []error {
 	if len(obj.wrappedErrs) != 0 {
 		return obj.wrappedErrs
